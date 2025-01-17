@@ -17,6 +17,7 @@
       }
     }
   ],
+  "buildCommand": "bash backend/build_files.sh",
   "routes": [
     {
       "src": "/static/(.*)",

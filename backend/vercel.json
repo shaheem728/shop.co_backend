@@ -26,5 +26,7 @@
       "src": "/(.*)",
       "dest": "backend/backend/wsgi.py"
     }
-  ]
+  ],
+  "rewrites":[
+    {"source":"/(.*)","destination":"/"}
 }

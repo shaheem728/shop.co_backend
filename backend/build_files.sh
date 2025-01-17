@@ -1,14 +1,10 @@
 #!/bin/bash
 echo "BUILD START"
-
 echo "Installing dependencies..."
-pip install -r requirements.txt || { echo "Dependency installation failed"; exit 1; }
-
+python3.9 pip install -r requirements.txt 
 echo "Running migrations..."
-python3.9 manage.py makemigrations --noinput || { echo "Migrations failed"; exit 1; }
-python3.9 manage.py migrate --noinput || { echo "Migration application failed"; exit 1; }
-
+python3.9 manage.py makemigrations --noinput 
+python3.9 manage.py migrate --noinput 
 echo "Collecting static files..."
-python3.9 manage.py collectstatic --noinput --clear || { echo "Static file collection failed"; exit 1; }
-
+python3.9 manage.py collectstatic --noinput --clear 
 echo "BUILD END"

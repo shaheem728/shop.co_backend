@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'product',
     'user',
 ]
-FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
+FRONTEND_URL = config("FRONTEND_URL")
 JAZZMIN_SETTINGS = {
     "site_title": "Shop.co",
     "welcome_sign": "Admin",

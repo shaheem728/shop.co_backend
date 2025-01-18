@@ -15,7 +15,7 @@
   ],
   "routes": [
     {
-      "src": "/staic/(.*)",
+      "src": "/static/(.*)",
       "dest": "/static/$1"
     },
     {
@@ -23,8 +23,9 @@
       "dest": "backend/wsgi.py"
     }
   ],
-    "functions": {
+  "functions": {
     "/api/**/*": {
       "maxDuration": 5
     }
+  }
 }

@@ -184,7 +184,7 @@ STATIC_ROOT = os.path.join(BASE_DIR / 'staticfiles_build')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
-SITE_URL = "http://localhost:3000"
+SITE_URL = config('SITE_URL', default='http://localhost:3000')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

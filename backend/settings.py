@@ -26,8 +26,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG',cast=bool)
 
-ALLOWED_HOSTS = ['.vercel.app', '127.0.0.1']
-
+ALLOWED_HOSTS = ['.vercel.app','.now.sh','*']
 
 # Application definition
 
@@ -46,7 +45,7 @@ INSTALLED_APPS = [
     'product',
     'user',
 ]
-FRONTEND_URL = config("FRONTEND_URL")
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
 JAZZMIN_SETTINGS = {
     "site_title": "Shop.co",
     "welcome_sign": "Admin",
@@ -163,10 +162,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    'https://shop-co-frontend-five.vercel.app'
-]
-
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:3000').split(',')
+CORS_ALLOW_ALL_ORIGINS = True
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 

@@ -26,7 +26,8 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG',cast=bool)
 
-ALLOWED_HOSTS = ['.vercel.app','.now.sh','*']
+ALLOWED_HOSTS = ['shop-co-backend-rust.vercel.app', '127.0.0.1']
+
 
 # Application definition
 
@@ -45,7 +46,7 @@ INSTALLED_APPS = [
     'product',
     'user',
 ]
-FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
+FRONTEND_URL = config("FRONTEND_URL")
 JAZZMIN_SETTINGS = {
     "site_title": "Shop.co",
     "welcome_sign": "Admin",
@@ -162,8 +163,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:3000').split(',')
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://shop-co-frontend-five.vercel.app",
+    "http://localhost:3000"
+]
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -184,7 +187,7 @@ STATIC_ROOT = os.path.join(BASE_DIR / 'staticfiles_build')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
-SITE_URL = config('SITE_URL', default='http://localhost:3000')
+SITE_URL = config('SITE_URL')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

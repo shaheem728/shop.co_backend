@@ -1,10 +1,8 @@
 #!/bin/bash
 echo "BUILD START"
-# Install pip if not already installed
-python3 -m ensurepip --upgrade
-python3 -m pip install --upgrade pip
+
 # Install required dependencies
-python3 -m pip install --no-cache-dir -r requirements.txt
+python3.9 -m pip install requirements.txt
 echo "Collectstatic.."
-python3.12 manage.py collectstatic --noinput --clear
+python3.9 manage.py collectstatic --noinput --clear
 echo "BUILD END"

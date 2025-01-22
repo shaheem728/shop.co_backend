@@ -1,9 +1,10 @@
 #!/bin/bash
 echo "BUILD START"
-python3.12 -m pip install -r requirements.txt
-echo "Make Migration.."
-python3.12 manage.py makemigrations --noinput
-python3.12 manage.py migrate --noinput
+# Install pip if not already installed
+python3 -m ensurepip --upgrade
+python3 -m pip install --upgrade pip
+# Install required dependencies
+python3 -m pip install --no-cache-dir -r requirements.txt
 echo "Collectstatic.."
 python3.12 manage.py collectstatic --noinput --clear
 echo "BUILD END"

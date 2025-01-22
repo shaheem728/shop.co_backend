@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'product',
     'user',
 ]
-FRONTEND_URL = config("FRONTEND_URL")
+
 JAZZMIN_SETTINGS = {
     "site_title": "Shop.co",
     "welcome_sign": "Admin",
@@ -57,10 +57,10 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
     "topmenu_links": [
         # external url that opens in a new window (Permissions can be added)
-        {"name": "shop.co", "url": FRONTEND_URL, "new_window": True},
+        {"name": "shop.co", "url": "https://shop-co-frontend-five.vercel.app", "new_window": True},
     ],
     "usermenu_links": [
-         {"name": "Shop.co", "url": FRONTEND_URL, "new_window": True},
+         {"name": "Shop.co", "url":"https://shop-co-frontend-five.vercel.app", "new_window": True},
         {"model": "auth.user"}
     ],
 } 
@@ -163,7 +163,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS').split(',')
+CORS_ALLOWED_ORIGINS = [
+'https://shop-co-frontend-five.vercel.app'
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

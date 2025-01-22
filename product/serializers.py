@@ -1,10 +1,6 @@
 from . import models
 from rest_framework import serializers
-
 from rest_framework import serializers
-
-
- 
 class ProductReviewSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(read_only=True)
     product = serializers.PrimaryKeyRelatedField(queryset=models.Products.objects.all(), read_only=False)

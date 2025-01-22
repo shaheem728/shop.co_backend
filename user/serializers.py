@@ -6,11 +6,13 @@ from product.models import Products
 class ProfileSerializers(serializers.ModelSerializer):
     class Meta:
         model = models.Profile
-        fields = ['mobile', 'address']
+        fields = ['mobile', 'address','order_mobile']
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['address'].required = False
         self.fields['address'].allow_blank = True
+        self.fields['order_mobile'].required = False
+        self.fields['order_mobile'].allow_blank = True
     def validate_mobile(self, value):
         """
         Skip validation if the mobile number hasn't changed.
@@ -25,52 +27,62 @@ class ProfileSerializers(serializers.ModelSerializer):
         return value
 class UserSerializers(serializers.ModelSerializer):
     profile = ProfileSerializers()  # Use the nested serializer
-    password = serializers.CharField(write_only=True)  # Hide password in the response
+    password = serializers.CharField(write_only=True, required=False)  # Hide password in the response
+
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'first_name', 'last_name' ,'profile']  
+        fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name', 'profile']  
+
     def create(self, validated_data):
         # Extract profile and password data
-        print(validated_data)
         profile_data = validated_data.pop('profile', None)
-        password = validated_data.pop('password')
+        password = validated_data.pop('password', None)
+
         # Create User instance
         user = User.objects.create(**validated_data)
         user.set_password(password)
         user.save()
-       # Handle Profile creation or update
+
+        # Handle Profile creation or update
         if profile_data:
             profile, created = models.Profile.objects.get_or_create(
                 user=user,  # Look for existing Profile by User
                 defaults={'mobile': profile_data.get('mobile'),
-                          'address':profile_data.get('address')}  # Use default only if creating
+                          'address':profile_data.get('address'),
+                          'order_mobile':profile_data.get('order_mobile')},  
             )
             if not created:  # If Profile already exists, update it
                 profile.mobile = profile_data.get('mobile')
                 profile.address = profile_data.get('address')
+                profile.order_mobile = profile_data.get('order_mobile')
                 profile.save()
-            print(f"Profile {'created' if created else 'updated'}: {profile.mobile}")
-        return user   
+        return user  
+class UserProfileSerializers(serializers.ModelSerializer): 
+    class Meta:
+        model = models.Profile
+        fields = ['address', 'order_mobile']
+class UserDetailSerializers(serializers.ModelSerializer):
+    profile = UserProfileSerializers()
+    class Meta:
+        model = User
+        fields = ['email', 'first_name', 'last_name', 'profile'] 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('profile', None)
-       # Update user fields only if present in the validated_data
+        # Update user fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-        # Update the profile fields
+
+        # Update the profile fields if provided
         if profile_data:
             profile, _ = models.Profile.objects.get_or_create(user=instance)
-
-            # Check and update profile fields conditionally
             for attr, value in profile_data.items():
-                # Skip updating mobile if it hasn't changed
-                if attr == 'mobile' and profile.mobile == value:
-                    continue
                 setattr(profile, attr, value)
             profile.save()
-        return instance
+
+        return instance     
 class UserLoginSerializers(serializers.Serializer):
-      mobile = serializers.CharField()
+      username = serializers.CharField()
       password = serializers.CharField()
 class UserMobileSerializers(serializers.Serializer):
       mobile = serializers.CharField()
@@ -129,6 +141,4 @@ class orderDetailSerializer(serializers.ModelSerializer):
         # Return the user information associated with the order
         return {
             'id': obj.user.id,
-            'username': obj.user.username,
-            'email': obj.user.email
         }

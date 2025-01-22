@@ -12,6 +12,8 @@ from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import  TokenObtainPairView
+from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import authenticate
 from datetime import datetime 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -43,11 +45,32 @@ class StripeCheckoutViews(APIView):
             return Response({'checkout_session': checkout_session.url}, status=200)
         except Exception as e:
             return Response({'error': str(e)}, status=500)
+class TokenRefreshView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        refresh_token = request.data.get("refresh_token")  # Fetch the 'refresh' key
+        if not refresh_token:
+            return Response({'error': 'Refresh token missing!'}, status=400)
+        try:
+            refresh = RefreshToken(refresh_token)
+            tokens = {
+                    'refresh_token': str(refresh),
+                    'access_token': str(refresh.access_token),
+                }
+            response_data ={
+                "tokens":tokens,
+            }   
+            return Response(response_data, status=status.HTTP_200_OK)
+        except (InvalidToken, TokenError):
+            return Response({'error': 'Invalid or expired refresh token!'}, status=401)
+          
 class UserDetailView(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = serializers.UserSerializers
     queryset = models.User.objects.all()
-    permission_classes = [AllowAny]
     lookup_field = "id"
+    def get_queryset(self):
+        return models.User.objects.filter(is_staff=False, is_superuser=False)
 class UserCreateView(CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = serializers.UserSerializers
@@ -58,7 +81,6 @@ class UserCreateView(CreateAPIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            print("Serializer errors:", serializer.errors)  # Debugging: Print the serializer errors
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class UserLoginView(APIView):
     permission_classes = [AllowAny]
@@ -67,39 +89,36 @@ class UserLoginView(APIView):
        # Validate serializer
         if not serializer.is_valid():
             return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        mobile = serializer.validated_data.get('mobile')
+        username = serializer.validated_data.get('username')
         password = serializer.validated_data.get('password')
         try:
-            # Check if the profile exists and get the associated user
-            profile = models.Profile.objects.get(mobile=mobile)
-            user = profile.user
-            # Authenticate user with username and password
-            user = authenticate(username=user.username, password=password)
+            user = authenticate(username=username, password=password)
             if user is not None:
                 # Generate JWT tokens
                 refresh = RefreshToken.for_user(user)
                 tokens = {
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
+                    'refresh_token': str(refresh),
+                    'access_token': str(refresh.access_token),
                 }
              # Store or update tokens in the database
                 user_token, created = models.UserToken.objects.update_or_create(
                     user=user,
                     defaults={
-                        'access_token': tokens['access'],
-                        'refresh_token': tokens['refresh'],
+                        'access_token': tokens['access_token'],
+                        'refresh_token': tokens['refresh_token'],
                     }
                 )
                 response_data = {
                     'tokens': tokens,
                     'user_id': user.id,
                     'error': None,
+                    'is_admin': user.is_staff,
                 }
                 return Response(response_data, status=status.HTTP_200_OK)
             else:
                 return Response({'error': 'Invalid credentials!'}, status=status.HTTP_400_BAD_REQUEST)
         except models.Profile.DoesNotExist:
-            return Response({'error': 'Invalid mobile number!'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Invalid mobile number!'}, status=status.HTTP_400_BAD_REQUEST)            
 class LogoutView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
@@ -108,24 +127,34 @@ class LogoutView(APIView):
             refresh_token = request.data.get('refresh_token')
             if not refresh_token:
                 return Response({"error": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
-
             # Blacklist the refresh token
             token = RefreshToken(refresh_token)
             token.blacklist()
-
             return Response({"message": "Successfully logged out"}, status=status.HTTP_205_RESET_CONTENT)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)            
-class UserUpdateView(UpdateAPIView):
-    serializer_class = serializers.UserSerializers
+class UserUpdateView(APIView):
+    serializer_class = serializers.UserDetailSerializers
     permission_classes = [IsAuthenticated]
 
-    def get_serializer_context(self):
-        # Add the request context for the serializer
-        return {'request': self.request}
+    def patch(self, request, id):
+        # Check if the authenticated user is trying to update their own details
+        if request.user.id != id and not request.user.is_staff:
+            raise PermissionDenied("You can only update your own details.")
 
-    def get_object(self):
-        return self.request.user  
+        try:
+            user = User.objects.get(id=id)  # Retrieve the user by ID
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Update the user details
+        serializer = self.serializer_class(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+  
 class mobileValidateView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
@@ -168,15 +197,14 @@ class ChangePasswordView(APIView):
                 error = 'Profile not exists!!'  
             return Response({'error': error})  
 class CreateOrderView(APIView):
-    permission_classes = [AllowAny]  
+    permission_classes = [IsAuthenticated] 
     def post(self, request, *args, **kwargs):
         serializer = serializers.OrderSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)  # Assign the logged-in user
             return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400) 
 class UserOrderDetailView(APIView):
-    permission_classes = [AllowAny]  
+    permission_classes = [IsAuthenticated]  
     def get(self, request, user_id):
         try:
             # Retrieve all orders for the specified user ID
@@ -188,10 +216,8 @@ class UserOrderDetailView(APIView):
 class OrderUpdateView(APIView):
     permission_classes = [AllowAny] 
     def put(self, request,uuid):
-        print(f"Received UUID: {uuid}")
         try:
             order = models.Order.objects.get(uuid=uuid)
-            print("order=",order)
             order.isPaid = True
             order.paidAt = datetime.now()
             order.save()

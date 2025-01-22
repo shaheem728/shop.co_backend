@@ -9,6 +9,7 @@ import uuid
 class Profile(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE,related_name='profile')    
     mobile = models.CharField(max_length=15,null=True,unique=True) 
+    order_mobile = models.CharField(max_length=15,null=True) 
     address = models.TextField(null=True)
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):

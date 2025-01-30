@@ -57,10 +57,10 @@ JAZZMIN_SETTINGS = {
     "site_icon": None,
     "topmenu_links": [
         # external url that opens in a new window (Permissions can be added)
-        {"name": "shop.co", "url": "https://shop-co-frontend-five.vercel.app", "new_window": True},
+        {"name": "shop.co", "url": "https://shop-co-frontend-mocha.vercel.app", "new_window": True},
     ],
     "usermenu_links": [
-         {"name": "Shop.co", "url":"https://shop-co-frontend-five.vercel.app", "new_window": True},
+         {"name": "Shop.co", "url":"https://shop-co-frontend-mocha.vercel.app/", "new_window": True},
         {"model": "auth.user"}
     ],
 } 
@@ -164,7 +164,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-'https://shop-co-frontend-five.vercel.app'
+'https://shop-co-frontend-mocha.vercel.app'
 ]
 
 # Internationalization

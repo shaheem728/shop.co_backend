@@ -114,8 +114,6 @@ class OrderSerializer(serializers.ModelSerializer):
         # Return the user information associated with the order
         return {
             'id': obj.user.id,
-            'username': obj.user.username,
-            'email': obj.user.email
         }
     def create(self, validated_data):
         order_items_data = validated_data.pop('order_items')

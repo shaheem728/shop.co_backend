@@ -12,8 +12,8 @@ class ProductReviewSerializer(serializers.ModelSerializer):
     def get_user(self, obj):
         if obj.user:  
             return {
-                'id': obj.user.id,
-                'username': obj.user.username,
+                'first_name': obj.user.first_name, 
+                'last_name': obj.user.last_name,
             }
         return None  # Return None if the user is not set
 

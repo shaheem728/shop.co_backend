@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny,IsAuthenticated
 
 class ProductListviews(ListAPIView):
     serializer_class = ProductsSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
         # Get search query

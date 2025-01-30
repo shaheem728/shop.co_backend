@@ -4,7 +4,7 @@ echo "BUILD START"
 python3 -m ensurepip --upgrade
 python3 -m pip install --upgrade pip
 # Install required dependencies
-python3 -m pip install --no-cache-dir -r requirements.txt
+python3 -m pip install -r requirements.txt
 echo "Collectstatic.."
-python3.12 manage.py collectstatic --noinput --clear
+python3 manage.py collectstatic --noinput 
 echo "BUILD END"

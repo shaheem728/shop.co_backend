@@ -187,9 +187,7 @@ STATIC_ROOT = os.path.join(BASE_DIR / 'staticfiles_build')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
-SITE_URL = [
-    'https://shop-co-frontend-mocha.vercel.app'
-]
+SITE_URL = 'https://shop-co-frontend-mocha.vercel.app'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

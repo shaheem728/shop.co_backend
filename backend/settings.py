@@ -60,7 +60,7 @@ JAZZMIN_SETTINGS = {
         {"name": "shop.co", "url": "https://shop-co-frontend-mocha.vercel.app", "new_window": True},
     ],
     "usermenu_links": [
-         {"name": "Shop.co", "url":"https://shop-co-frontend-mocha.vercel.app/", "new_window": True},
+         {"name": "Shop.co", "url":"https://shop-co-frontend-mocha.vercel.app", "new_window": True},
         {"model": "auth.user"}
     ],
 } 
@@ -188,7 +188,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
 SITE_URL = [
-    'https://shop-co-frontend-five.vercel.app'
+    'https://shop-co-frontend-mocha.vercel.app'
 ]
 
 REST_FRAMEWORK = {
